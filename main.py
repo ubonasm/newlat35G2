@@ -115,7 +115,7 @@ Respond in the following JSON format:
 
 # ページ設定
 st.set_page_config(
-    page_title="Classroom Discourse Analysis System",
+    page_title="new LAT35 G2: Lesson Analysis using Transcript",
     page_icon="📚",
     layout="wide"
 )
@@ -131,7 +131,7 @@ if 'codings' not in st.session_state:
     st.session_state.codings = []
 
 # タイトル
-st.title("📚 Classroom Discourse Analysis System")
+st.title("📚 new LAT35 G2")
 st.markdown("---")
 
 # サイドバー
@@ -172,7 +172,7 @@ with st.sidebar:
         )
         model = st.selectbox(
             "Model",
-            ["gemini-2.0-flash-exp", "gemini-1.5-pro", "gemini-1.5-flash"],
+            ["gemini-2.5-flash", "gemini-2.5-flash-lite", "gemini-2.0-flash-exp", "gemini-1.5-pro", "gemini-1.5-flash"],
             key="gemini_model"
         )
     
