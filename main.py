@@ -11,6 +11,108 @@ import networkx as nx
 from io import BytesIO
 import base64
 
+# AI analysis functions
+def analyze_topics_with_ai(utterances, num_topics, api_key, provider, model):
+    """Analyze topics using AI"""
+    text = "\n".join([f"{u['No']}. {u['Speaker']}: {u['Utterance']}" for u in utterances[:50]])
+    
+    prompt = f"""Below is a classroom discourse transcript. Extract {num_topics} main topics from this classroom session.
+
+Transcript:
+{text}
+
+Respond in the following JSON format:
+{{
+  "topics": [
+    {{
+      "title": "Topic title",
+      "description": "Topic description",
+      "utterance_ids": [list of related utterance numbers]
+    }}
+  ]
+}}
+"""
+    
+    if provider == "Groq":
+        from groq import Groq
+        client = Groq(api_key=api_key)
+        
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": "You are an expert in educational discourse analysis. You analyze classroom transcripts and extract topics."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=2000
+        )
+        
+        result_text = response.choices[0].message.content
+        
+    else:  # Gemini
+        import google.generativeai as genai
+        genai.configure(api_key=api_key)
+        model_instance = genai.GenerativeModel(model)
+        
+        response = model_instance.generate_content(prompt)
+        result_text = response.text
+    
+    import re
+    json_match = re.search(r'\{.*\}', result_text, re.DOTALL)
+    if json_match:
+        return json.loads(json_match.group())
+    else:
+        return json.loads(result_text)
+
+
+def analyze_speaker_with_ai(speaker_name, utterances, api_key, provider, model):
+    """Analyze speaker using AI"""
+    text = "\n".join([f"- {u}" for u in utterances[:30]])
+    
+    prompt = f"""Below are utterances from a speaker named "{speaker_name}" in a classroom. Analyze this speaker's role, characteristics, and communication style.
+
+Utterances:
+{text}
+
+Respond in the following JSON format:
+{{
+  "role": "Speaker's role (e.g., Teacher, Student, Facilitator)",
+  "characteristics": "Speaker characteristics (about 200 characters)",
+  "communication_style": "Communication style description (about 200 characters)"
+}}
+"""
+    
+    if provider == "Groq":
+        from groq import Groq
+        client = Groq(api_key=api_key)
+        
+        response = client.chat.completions.create(
+            model=model,
+            messages=[
+                {"role": "system", "content": "You are an expert in educational discourse analysis. You analyze speaker characteristics."},
+                {"role": "user", "content": prompt}
+            ],
+            temperature=0.7,
+            max_tokens=1500
+        )
+        
+        result_text = response.choices[0].message.content
+        
+    else:  # Gemini
+        import google.generativeai as genai
+        genai.configure(api_key=api_key)
+        model_instance = genai.GenerativeModel(model)
+        
+        response = model_instance.generate_content(prompt)
+        result_text = response.text
+    
+    import re
+    json_match = re.search(r'\{.*\}', result_text, re.DOTALL)
+    if json_match:
+        return json.loads(json_match.group())
+    else:
+        return json.loads(result_text)
+
 # ページ設定
 st.set_page_config(
     page_title="Classroom Discourse Analysis System",
@@ -695,104 +797,3 @@ elif menu == "Data Management":
             st.session_state.codings = []
             st.success("✅ All data has been reset")
             st.rerun()
-
-def analyze_topics_with_ai(utterances, num_topics, api_key, provider, model):
-    """Analyze topics using AI"""
-    text = "\n".join([f"{u['No']}. {u['Speaker']}: {u['Utterance']}" for u in utterances[:50]])
-    
-    prompt = f"""Below is a classroom discourse transcript. Extract {num_topics} main topics from this classroom session.
-
-Transcript:
-{text}
-
-Respond in the following JSON format:
-{{
-  "topics": [
-    {{
-      "title": "Topic title",
-      "description": "Topic description",
-      "utterance_ids": [list of related utterance numbers]
-    }}
-  ]
-}}
-"""
-    
-    if provider == "Groq":
-        from groq import Groq
-        client = Groq(api_key=api_key)
-        
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": "You are an expert in educational discourse analysis. You analyze classroom transcripts and extract topics."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7,
-            max_tokens=2000
-        )
-        
-        result_text = response.choices[0].message.content
-        
-    else:  # Gemini
-        import google.generativeai as genai
-        genai.configure(api_key=api_key)
-        model_instance = genai.GenerativeModel(model)
-        
-        response = model_instance.generate_content(prompt)
-        result_text = response.text
-    
-    import re
-    json_match = re.search(r'\{.*\}', result_text, re.DOTALL)
-    if json_match:
-        return json.loads(json_match.group())
-    else:
-        return json.loads(result_text)
-
-
-def analyze_speaker_with_ai(speaker_name, utterances, api_key, provider, model):
-    """Analyze speaker using AI"""
-    text = "\n".join([f"- {u}" for u in utterances[:30]])
-    
-    prompt = f"""Below are utterances from a speaker named "{speaker_name}" in a classroom. Analyze this speaker's role, characteristics, and communication style.
-
-Utterances:
-{text}
-
-Respond in the following JSON format:
-{{
-  "role": "Speaker's role (e.g., Teacher, Student, Facilitator)",
-  "characteristics": "Speaker characteristics (about 200 characters)",
-  "communication_style": "Communication style description (about 200 characters)"
-}}
-"""
-    
-    if provider == "Groq":
-        from groq import Groq
-        client = Groq(api_key=api_key)
-        
-        response = client.chat.completions.create(
-            model=model,
-            messages=[
-                {"role": "system", "content": "You are an expert in educational discourse analysis. You analyze speaker characteristics."},
-                {"role": "user", "content": prompt}
-            ],
-            temperature=0.7,
-            max_tokens=1500
-        )
-        
-        result_text = response.choices[0].message.content
-        
-    else:  # Gemini
-        import google.generativeai as genai
-        genai.configure(api_key=api_key)
-        model_instance = genai.GenerativeModel(model)
-        
-        response = model_instance.generate_content(prompt)
-        result_text = response.text
-    
-    import re
-    json_match = re.search(r'\{.*\}', result_text, re.DOTALL)
-    if json_match:
-        return json.loads(json_match.group())
-    else:
-        return json.loads(result_text)
