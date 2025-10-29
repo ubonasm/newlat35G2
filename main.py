@@ -183,7 +183,7 @@ with st.sidebar:
 
 # データ読み込みセクション
 if menu == "Data Loading":
-    st.header("📥 Load Classroom Records")
+    st.header("📥 Load Transcript")
     
     col1, col2 = st.columns([2, 1])
     
@@ -260,7 +260,7 @@ elif menu == "Coding":
     st.header("🏷️ Coding")
     
     if not st.session_state.utterances:
-        st.warning("⚠️ Please load classroom records first")
+        st.warning("⚠️ Please load transcript first")
     else:
         tab1, tab2, tab3 = st.tabs(["Code Management", "Apply Codes", "Code Categories"])
         
@@ -399,7 +399,7 @@ elif menu == "Analysis & Visualization":
     st.header("📊 Analysis & Visualization")
     
     if not st.session_state.utterances:
-        st.warning("⚠️ Please load classroom records first")
+        st.warning("⚠️ Please load transcript first")
     else:
         df = pd.DataFrame(st.session_state.utterances)
         
@@ -650,7 +650,7 @@ elif menu == "AI Analysis":
     st.header("🤖 AI Analysis")
     
     if not st.session_state.utterances:
-        st.warning("⚠️ Please load classroom records first")
+        st.warning("⚠️ Please load transcript first")
     elif not hasattr(st.session_state, 'ai_api_key') or not st.session_state.ai_api_key:
         st.warning("⚠️ Please configure AI API key in the sidebar")
     else:
